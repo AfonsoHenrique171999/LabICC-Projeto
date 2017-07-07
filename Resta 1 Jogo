@@ -1,0 +1,228 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct struct_posicao {
+    char linha;
+    char coluna;
+} posicao;
+
+int validar_entrada(posicao p){
+    if (!(49 <= p.linha && p.linha <= 55)){
+
+        return 0;
+    }
+    if(!(49 <= p.coluna && p.coluna <= 55)){
+
+        return 0;
+    }
+    return 1;
+}
+
+int validar_posicao (posicao p, int m[7][7]){
+    int i, j;
+    i = p.linha - 49;
+    j = p.coluna - 49;
+    if(m[i][j] == -1){
+
+        return 0;
+    }
+    return 1;
+}
+
+int validar_movimento (posicao o, posicao d, int m[7][7]){
+    int i, j, k, l;
+    i = o.linha - 49;
+    j = o.coluna - 49;
+    if(m[i][j] == 0){
+
+        return 0;
+    }
+    k = d.linha - 49;
+    l = d.coluna - 49;
+    if(m[k][l] == 1){
+
+
+        return 0;
+    }
+    if (i != k && j != l){
+
+
+        return 0;
+    }
+    if (i == k){
+        if (abs(j - l) != 2){
+
+
+            return 0;
+        }
+        else if(m[i][(j+l)/2] == 0){
+
+
+            return 0;
+        }
+    }
+    if (j == l){
+        if (abs(i - k) != 2){
+
+
+            return 0;
+        }
+         else if(m[j][(i+k)/2] == 0){
+
+
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void imprimir_matriz(int x[7][7]){
+    int i, j;
+    // Cabecalho
+    printf("  ");
+    for ( j = 0; j < 7; j++){
+        printf(" %d", j+1);
+    }
+    printf("\n\n");
+
+    for (i = 0; i < 7; i++){
+        printf("%d ", i+1);
+        for ( j = 0; j < 7; j++){
+            if (x[i][j] == -1){
+                printf("  ");
+            }
+            else{
+                printf(" %d", x[i][j]);
+            }
+        }
+        printf(" \n");
+    }
+}
+
+void atualizar_tabuleiro(posicao o, posicao p, int m[7][7]){
+     int i, j, k, l;
+    i = o.linha - 49;
+    j = o.coluna - 49;
+    k = p.linha - 49;
+    l = p.coluna - 49;
+    m[i][j] = 0;
+    m[k][l] = 1;
+    m[(i+k)/2][(j+l)/2] = 0;
+}
+
+int status_game(int m[7][7]){
+    posicao o, d;
+    int c = 0, i, j;
+    for(i = 0; i < 7; i++){
+        for(j = 0; j < 7; j ++){
+            if(m[i][j] == 1){
+                c++;
+            }
+        }
+    }
+    if(c == 1){
+        printf("Parabens, voce venceu!");
+        return 1;
+    }
+    for(i = 0; i < 7; i++){
+        for(j = 0; j < 7; j++){
+            o.linha = i;
+            o.coluna = j;
+            if(validar_posicao(o,m) == 0){
+                continue;
+            }
+            if(i - 2 >= 0){
+                d.linha = i-2;
+                d.coluna = j;
+                if(validar_posicao(d,m) == 0){
+                    continue;
+                }
+                if(validar_movimento(o,d,m) == 1){
+                    return 0;
+                }
+            }
+            if(i + 2 <= 6){
+                d.linha = i+2;
+                d.coluna = j;
+                if(validar_posicao(d,m) == 0){
+                    continue;
+                }
+                if(validar_movimento(o,d,m) == 1){
+                    return 0;
+                }
+            }
+            if(j - 2 >= 0){
+                d.linha = i;
+                d.coluna = j-2;
+                if(validar_posicao(d,m) == 0){
+                    continue;
+                }
+                if(validar_movimento(o,d,m) == 1){
+                    return 0;
+                }
+            }
+            if(j + 2 <= 6){
+                d.linha = i;
+                d.coluna = j+2;
+                if(validar_posicao(d,m) == 0){
+                    continue;
+                }
+                if(validar_movimento(o,d,m) == 1){
+                    return 0;
+
+                }
+            }
+        }
+    }
+    printf("Que pena, voce perdeu.");
+    return -1;
+}
+
+int main (){
+    int i;
+    posicao origem, destino;
+    int m[7][7] = {
+        {-1, -1, 1, 1, 1, -1, -1},
+        {-1, -1, 1, 1, 1, -1, -1},
+        { 1,  1, 1, 1, 1,  1,  1},
+        { 1,  1, 1, 0, 1,  1,  1},
+        { 1,  1, 1, 1, 1,  1,  1},
+        {-1, -1, 1, 1, 1, -1, -1},
+        {-1, -1, 1, 1, 1, -1, -1}};
+
+    while(1){
+        printf("\n\n");
+        imprimir_matriz(m);
+        printf("\nDigite a peca a ser movimentada: ");
+        scanf (" %c %c", &origem.linha, &origem.coluna);
+        if (validar_entrada(origem) == 0){
+            printf("Entrada invalida");
+            continue;
+        }
+        if (validar_posicao (origem, m) == 0){
+            printf("Posicao invalida");
+            continue;
+        }
+        printf("Digite para onde quer movimentar a peca: ");
+        scanf (" %c %c", &destino.linha, &destino.coluna);
+        if (validar_entrada(destino) == 0){
+            printf("Entrada invalida");
+            continue;
+        }
+        if (validar_posicao (destino, m) == 0){
+            printf("Posicao invalida");
+            continue;
+        }
+        if (validar_movimento(origem, destino, m) == 0){
+            printf("movimento invalido");
+            continue;
+        } else {
+            atualizar_tabuleiro(origem,destino, m);
+            if (status_game(m) != 0){
+                break;
+            }
+        }
+        system("cls");
+    }
+    return 0;
+}
